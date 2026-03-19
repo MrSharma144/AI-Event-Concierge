@@ -32,14 +32,19 @@ export default function HistoryList({ history, onSelectHistory }) {
             </div>
 
             <h3 className="text-white font-bold text-lg mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
-              {item.proposal?.venue_name}
+              {item.proposals && item.proposals.length > 0 ? item.proposals[0].venue_name : 'No Venue'}
+              {item.proposals && item.proposals.length > 1 && (
+                <span className="ml-2 text-xs text-blue-500">+{item.proposals.length - 1} more</span>
+              )}
             </h3>
             <p className="text-slate-400 text-sm italic line-clamp-2 leading-relaxed opacity-60">
               "{item.query}"
             </p>
 
             <div className="mt-6 flex justify-between items-center bg-white/5 p-3 rounded-2xl">
-              <span className="text-emerald-400 font-bold text-sm tracking-tight">{item.proposal?.estimated_cost}</span>
+              <span className="text-emerald-400 font-bold text-sm tracking-tight">
+                {item.proposals && item.proposals.length > 0 ? item.proposals[0].estimated_cost : 'N/A'}
+              </span>
               <ChevronRight size={16} className="text-slate-600 group-hover:text-blue-500 transition-colors" />
             </div>
           </motion.div>
@@ -62,7 +67,7 @@ export default function HistoryList({ history, onSelectHistory }) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border-2 border-blue-500/30 rounded-[2.5rem] p-10 shadow-[0_0_100px_rgba(59,130,246,0.15)] scrollbar-hide"
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-950/90 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl scrollbar-hide"
             >
               {/* Close Button */}
               <button 
@@ -74,52 +79,51 @@ export default function HistoryList({ history, onSelectHistory }) {
 
               <div className="flex items-center gap-3 mb-8 text-blue-400">
                 <Sparkles size={24} />
-                <span className="text-xs font-black uppercase tracking-[0.3em]">Proposal Details</span>
+                <span className="text-xs font-black uppercase tracking-[0.3em]">
+                  {selectedRecord.proposals?.length > 1 ? `${selectedRecord.proposals.length} Proposals Found` : 'Individual Proposal'}
+                </span>
               </div>
 
               <div className="space-y-8">
-                <div>
-                  <h4 className="text-3xl font-black text-white mb-2 leading-tight">
-                    {selectedRecord.proposal?.venue_name}
-                  </h4>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <MapPin size={16} />
-                    <span className="text-sm">{selectedRecord.proposal?.location}</span>
-                  </div>
-                </div>
-
                 <div className="bg-white/5 rounded-3xl p-6 border border-white/5">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">AI Plan For:</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Your Query:</p>
                   <p className="text-slate-300 italic font-medium">"{selectedRecord.query}"</p>
                 </div>
 
-                <div className="space-y-4">
-                  <p className="text-slate-300 text-lg leading-relaxed">
-                    {selectedRecord.proposal?.justification}
-                  </p>
-                  
-                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <div className="flex items-center gap-2 text-emerald-400">
-                      <DollarSign size={24} />
-                      <span className="text-3xl font-black">{selectedRecord.proposal?.estimated_cost}</span>
+                <div className="space-y-6">
+                  {selectedRecord.proposals?.map((prop, idx) => (
+                    <div key={idx} className="bg-slate-900/50 p-6 rounded-3xl border border-white/5 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-xl font-bold text-white">{prop.venue_name}</h4>
+                        <span className="text-emerald-400 font-bold">{prop.estimated_cost}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-500 text-sm">
+                        <MapPin size={14} />
+                        <span>{prop.location}</span>
+                      </div>
+                      <p className="text-slate-400 text-sm leading-relaxed italic">"{prop.justification}"</p>
                     </div>
-                    <button 
-                      onClick={() => {
-                        onSelectHistory(selectedRecord.proposal);
-                        setSelectedRecord(null);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition-all shadow-lg shadow-blue-600/20 active:scale-95"
-                    >
-                      Load Goal
-                    </button>
-                  </div>
+                  ))}
+                </div>
+
+                <div className="pt-6">
+                  <button 
+                    onClick={() => {
+                      onSelectHistory(selectedRecord);
+                      setSelectedRecord(null);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+                  >
+                    View in Main Dashboard
+                  </button>
                 </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

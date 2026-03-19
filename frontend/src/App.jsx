@@ -144,10 +144,10 @@ function App() {
                   transition={{ type: 'spring', damping: 20 }}
                   className="mt-12"
                 >
-                  <div className="flex justify-between items-center mb-4 max-w-4xl mx-auto">
+                  <div className="flex justify-between items-center mb-8 max-w-4xl mx-auto">
                     <h2 className="text-xl font-bold text-white flex items-center gap-2">
                       <LayoutDashboard size={20} className="text-blue-500" />
-                      Current Result
+                      {currentProposal.proposals?.length > 1 ? `Top ${currentProposal.proposals.length} Suggestions` : 'Our Best Suggestion'}
                     </h2>
                     <button 
                       onClick={() => setCurrentProposal(null)}
@@ -156,9 +156,15 @@ function App() {
                       Clear result
                     </button>
                   </div>
-                  <ProposalCard proposal={currentProposal} />
+                  
+                  <div className="grid grid-cols-1 gap-12">
+                    {currentProposal.proposals?.map((prop, index) => (
+                      <ProposalCard key={index} proposal={prop} />
+                    ))}
+                  </div>
                 </motion.div>
               )}
+
             </AnimatePresence>
           </section>
 

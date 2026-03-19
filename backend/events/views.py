@@ -18,22 +18,29 @@ def propose_event(request):
 
     # Save to Database
     event_search = EventSearch.objects.create(query=query)
-    venue_proposal = VenueProposal.objects.create(
-        event=event_search,
-        venue_name=proposal_data.get('venue_name', 'Unknown'),
-        location=proposal_data.get('location', 'Unknown'),
-        estimated_cost=proposal_data.get('estimated_cost', 'Unknown'),
-        justification=proposal_data.get('justification', 'No justification provided.')
-    )
+    proposals_to_return = []
+    
+    for prop in proposal_data.get('proposals', []):
+        venue_proposal = VenueProposal.objects.create(
+            event=event_search,
+            venue_name=prop.get('venue_name', 'Unknown'),
+            location=prop.get('location', 'Unknown'),
+            estimated_cost=prop.get('estimated_cost', 'Unknown'),
+            justification=prop.get('justification', 'No justification provided.')
+        )
+        proposals_to_return.append({
+            'id': venue_proposal.id,
+            'venue_name': venue_proposal.venue_name,
+            'location': venue_proposal.location,
+            'estimated_cost': venue_proposal.estimated_cost,
+            'justification': venue_proposal.justification,
+        })
 
     return Response({
-        'id': venue_proposal.id,
-        'venue_name': venue_proposal.venue_name,
-        'location': venue_proposal.location,
-        'estimated_cost': venue_proposal.estimated_cost,
-        'justification': venue_proposal.justification,
+        'id': event_search.id,
         'query': event_search.query,
         'created_at': event_search.created_at.isoformat(),
+        'proposals': proposals_to_return
     })
 
 @api_view(['GET'])
@@ -42,19 +49,18 @@ def get_history(request):
     history_data = []
     
     for search in searches:
-        # Get latest proposal for each search (usually just one)
-        proposal = search.proposals.first()
-        if proposal:
-            history_data.append({
-                'id': search.id,
-                'query': search.query,
-                'created_at': search.created_at.isoformat(),
-                'proposal': {
-                    'venue_name': proposal.venue_name,
-                    'location': proposal.location,
-                    'estimated_cost': proposal.estimated_cost,
-                    'justification': proposal.justification,
-                }
-            })
+        proposals = search.proposals.all()
+        history_data.append({
+            'id': search.id,
+            'query': search.query,
+            'created_at': search.created_at.isoformat(),
+            'proposals': [{
+                'venue_name': p.venue_name,
+                'location': p.location,
+                'estimated_cost': p.estimated_cost,
+                'justification': p.justification,
+            } for p in proposals]
+        })
             
     return Response(history_data)
+

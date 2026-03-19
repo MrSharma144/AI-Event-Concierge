@@ -19,16 +19,21 @@ def generate_venue_proposal(query: str) -> dict:
 
     INSTRUCTIONS:
     1. Parse the USER_QUERY for: headcount, event type, budget, location preferences, and tone.
-    2. If details are missing (e.g., budget), provide a "Market-Standard" estimate based on the event scale.
-    3. The "justification" field must be professional, persuasive, and directly reference how the venue satisfies the specific constraints in the query.
-    4. Return ONLY a valid JSON object. No conversational preamble, no markdown formatting (```json), and no closing text.
+    2. Determine how many venue options the user is asking for. If they specify a number (e.g., "3 venues"), provide exactly that many. 
+    3. If they don't specify a number, provide the single best venue option.
+    4. For each venue, provide: name, location, estimated cost, and a professional justification.
+    5. Return ONLY a valid JSON object with a "proposals" key containing an array of objects.
 
     JSON SCHEMA:
     {{
-        "venue_name": "string (The specific, professional name of the suggested venue)",
-        "location": "string (City, Region, or Address)",
-        "estimated_cost": "string (Formatted currency, e.g., '$5,000' or '$12,500 including catering')",
-        "justification": "string (A detailed, high-impact paragraph highlighting 3+ reasons for the selection)"
+        "proposals": [
+            {{
+                "venue_name": "string (The specific, professional name of the suggested venue)",
+                "location": "string (City, Region, or Address)",
+                "estimated_cost": "string (Formatted currency, e.g., '$5,000' or '$12,500 including catering')",
+                "justification": "string (A detailed, high-impact paragraph highlighting 3+ reasons for the selection)"
+            }}
+        ]
     }}
 
     USER_QUERY: "{query}"
@@ -47,12 +52,26 @@ def generate_venue_proposal(query: str) -> dict:
         if response_text.endswith("```"):
             response_text = response_text[:-3]
             
-        return json.loads(response_text.strip())
+        data = json.loads(response_text.strip())
+        
+        # Ensure we always return a list of proposals
+        if isinstance(data, list):
+            return {"proposals": data}
+        if "proposals" not in data:
+            if "venue_name" in data:
+                return {"proposals": [data]}
+            return {"proposals": []}
+            
+        return data
+        
     except json.JSONDecodeError as e:
-        # Fallback dictionary if formatting fails
+        # Fallback if formatting fails
         return {
-            "venue_name": "AI Processing Error",
-            "location": "Unknown",
-            "estimated_cost": "N/A",
-            "justification": f"The AI could not return a structured proposal. Raw text: {response.text[:200]}..."
+            "proposals": [{
+                "venue_name": "AI Processing Error",
+                "location": "Unknown",
+                "estimated_cost": "N/A",
+                "justification": f"The AI could not return a structured proposal. Raw text: {response.text[:200]}..."
+            }]
         }
+
