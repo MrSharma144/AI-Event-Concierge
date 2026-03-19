@@ -1,16 +1,23 @@
-# React + Vite
+# AI Event Concierge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, functional Full-Stack application that uses AI to plan corporate offsites based on natural language input.
 
-Currently, two official plugins are available:
+## Features
+- **AI Intelligence**: Powered by Google's Gemini LLM to process descriptions and generate valid JSON venue proposals.
+- **Modern UI**: Completely styled with Tailwind CSS, featuring glassmorphism, dynamic gradients, lucide-react icons, and smooth animations.
+- **Data Persistence**: Backed by a Django REST Framework API and SQLite DB to maintain a history of previous searches.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup
+### Backend (Django)
+1. Navigate to the `backend/` directory and activate the python environment.
+2. Install dependencies: `pip install -r ../requirements.txt`.
+3. Create a `.env` file with `GEMINI_API_KEY`.
+4. Run migrations: `python manage.py migrate`.
+5. Start server: `python manage.py runserver`.
 
-## React Compiler
+### Frontend (Vite + React)
+1. Navigate to the `frontend/` directory.
+2. Install dependencies: `npm install`.
+3. Start dev server: `npm run dev`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The frontend communicates automatically with `http://127.0.0.1:8000/api/`.

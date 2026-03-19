@@ -19,8 +19,8 @@ def generate_venue_proposal(query: str) -> dict:
     
     genai.configure(api_key=api_key)
 
-    # Use a recommended model for text/instruct tasks
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Using the primary flash alias found in the available models list
+    model = genai.GenerativeModel('gemini-flash-latest')
     
     prompt = f'''
     You are an expert AI Event Concierge. Your task is to plan a corporate event based on the user's natural language description.
