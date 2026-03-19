@@ -3,12 +3,11 @@
 AI Event Concierge is a premium, AI-powered platform designed to revolutionize corporate event planning. By leveraging the **Gemini 1.5 Flash** model, the application transforms natural language queries into structured, high-fidelity venue proposals, complete with cost estimates and strategic justifications.
 
 ## ✨ Key Features
-- **AI-Powered Proposals**: Instant venue suggestions based on headcount, budget, and event type.
-- **Glassmorphism UI**: A "Serene Tech" aesthetic with modern dark mode, gradients, and micro-animations.
-- **Persistent Dashboard**: Real-time proposal display alongside a history of previous searches.
-- **Interactive History**: High-contrast grid layout with click-to-expand modals for full plan details.
-- **Smooth Navigation**: Intelligent scroll-to-top behavior and responsive design for all devices.
-- **Advanced Prompt Engineering**: Strategic "Event Architect" system prompting for consistent, structured data.
+- **Multi-Venue Suggestions**: Get multiple distinct venue options when requested (e.g., "Suggest 3 venues..."), otherwise provides the single best recommendation.
+- **Glassmorphism UI**: A "Serene Tech" aesthetic with modern dark mode, gradients, and micro-animations using Framer Motion.
+- **Persistent Dashboard**: Real-time proposal display alongside a persistent history of previous searches.
+- **Interactive History**: View all proposals from past searches in a dedicated section with popup details.
+- **Production Ready**: Configured for PostgreSQL on Render and high-performance frontend hosting on Vercel.
 
 ---
 
@@ -16,17 +15,18 @@ AI Event Concierge is a premium, AI-powered platform designed to revolutionize c
 ```text
 AI Event Concierge/
 ├── backend/                # Django REST API
-│   ├── core/               # Project settings & URL routing
+│   ├── backend/            # Project settings & URL routing
 │   ├── events/             # App logic (Models, Views, AI Services)
 │   ├── manage.py           # Django entry point
-│   └── .env                # Environment variables (GEMINI_API_KEY)
+│   ├── requirements.txt    # Python dependencies (requires psycopg[binary])
+│   └── runtime.txt         # Specifies Python version (3.13.0) for Render
 ├── frontend/               # React + Vite + Tailwind
 │   ├── src/
-│   │   ├── components/     # UI Components (ProposalCard, HistoryList, Footer, etc.)
+│   │   ├── components/     # UI Components (ProposalCard, HistoryList, etc.)
 │   │   ├── App.jsx         # Main application logic
 │   │   └── index.css       # Custom styles & Tailwind directives
-│   ├── tailwind.config.js  # Tailwind CSS configuration
-│   └── vite.config.js      # Vite build & dependency configuration
+│   ├── vercel.json         # SPA routing for Vercel deployment
+│   └── vite.config.js      # Vite build configuration
 └── README.md               # Project documentation
 ```
 
@@ -35,7 +35,7 @@ AI Event Concierge/
 ## 🚀 Local Setup Instructions
 
 ### 1. Prerequisites
-- **Python 3.10+**
+- **Python 3.12+**
 - **Node.js 18+** & **npm**
 - **Gemini API Key** (Get it from [Google AI Studio](https://aistudio.google.com/))
 
@@ -44,15 +44,16 @@ AI Event Concierge/
 cd backend
 python -m venv venv
 source venv/bin/scripts/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt  # Ensure django, djangorestframework, google-generativeai, django-cors-headers, python-dotenv are installed
+pip install -r requirements.txt
 ```
 
 **Configure Environment Variables:**
-Create a `.env` file in the `backend/` directory:
+Create a `.env` file in the `backend/` directory using `.env.example` as a template:
 ```env
-GEMINI_API_KEY=your_actual_api_key_here
-SECRET_KEY=your_django_secret_key
+SECRET_KEY='your-secret-key'
+GEMINI_API_KEY='your-gemini-key'
 DEBUG=True
+DATABASE_URL='' # Leave empty for SQLite, or use your Postgres URL
 ```
 
 **Run Migrations & Start Server:**
@@ -60,7 +61,6 @@ DEBUG=True
 python manage.py migrate
 python manage.py runserver
 ```
-The backend will run at `http://127.0.0.1:8000/`.
 
 ### 3. Frontend Setup (React)
 ```bash
@@ -68,50 +68,35 @@ cd frontend
 npm install
 npm run dev
 ```
-The frontend will run at `http://localhost:5173/`.
+
+---
+
+## ☁️ Deployment
+
+### 1. Backend (Render)
+- **Repo Base Directory**: `backend`
+- **Build Command**: `./build.sh`
+- **Start Command**: `gunicorn backend.wsgi:application`
+- **Environment Variables**:
+  - `DATABASE_URL`: Your Render Postgres URL.
+  - `GEMINI_API_KEY`: Your Gemini key.
+  - `SECRET_KEY`: A secure random string.
+  - `ALLOWED_HOSTS`: `your-backend.onrender.com`
+  - `CSRF_TRUSTED_ORIGINS`: `https://your-frontend.vercel.app`
+
+### 2. Frontend (Vercel)
+- **Framework Preset**: `Vite`
+- **Root Directory**: `frontend`
+- **Environment Variables**:
+  - `VITE_API_URL`: `https://your-backend.onrender.com/api`
 
 ---
 
 ## 🛠️ Technology Stack
-- **Frontend**: React.js, Vite, Tailwind CSS, Framer Motion, Lucide React.
-- **Backend**: Django, Django REST Framework.
-- **AI Engine**: Google Gemini 1.5 Flash (`gemini-flash-latest`).
-- **Database**: SQLite (Default for development).
-
----
-
-## 📝 Evaluation Criteria Notes
-For evaluators focusing on **AI Prompting** and **Consistent Structured Data**:
-- The project implements an **Advanced System Prompt** in `backend/events/services.py`.
-- It uses a **Strategic AI Event Architect** persona.
-- Explicit `JSON SCHEMA` is enforced within the prompt to guarantee structure.
-- Includes market-standard fallback logic for missing query parameters (budget/headcount).
-
----
-
-## ☁️ Deployment (Render + PostgreSQL)
-
-### 1. Database (Render PostgreSQL)
-- Create a new **PostgreSQL** database on Render.
-- Copy the **Internal Database URL** for the backend service.
-
-### 2. Backend (Render Web Service)
-- **Runtime**: Python 3
-- **Build Command**: `./build.sh` (ensure it's executable: `chmod +x build.sh`)
-- **Start Command**: `gunicorn backend.wsgi:application`
-- **Environment Variables**:
-  - `DATABASE_URL`: Your Render Postgres URL.
-  - `GEMINI_API_KEY`: Your Google AI Studio key.
-  - `SECRET_KEY`: A random secure string.
-  - `DEBUG`: `False`
-  - `ALLOWED_HOSTS`: `your-backend-url.onrender.com`
-  - `CSRF_TRUSTED_ORIGINS`: `https://your-frontend-url.onrender.com`
-
-### 3. Frontend (Render Static Site)
-- **Build Command**: `npm install && npm run build`
-- **Publish Directory**: `dist`
-- **Environment Variables**:
-  - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
+- **Frontend**: React, Vite, Tailwind CSS, Framer Motion, Lucide React.
+- **Backend**: Django 5.x, Django REST Framework.
+- **AI Engine**: Google Gemini 1.5 Flash.
+- **Database**: SQLite (Dev) / PostgreSQL (Prod).
 
 ---
 
