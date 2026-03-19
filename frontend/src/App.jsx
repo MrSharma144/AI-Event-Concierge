@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarDays, AlertCircle } from 'lucide-react';
+import { CalendarDays, AlertCircle, History, LayoutDashboard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import SearchForm from './components/SearchForm';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProposalCard from './components/ProposalCard';
@@ -59,37 +60,105 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 relative overflow-hidden selection:bg-blue-500/30 font-sans">
       {/* Background gradients */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[128px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[128px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        <header className="flex flex-col sm:flex-row justify-between items-center sm:pb-8 border-b border-white/10 mb-12 gap-4">
-          <div className="flex items-center gap-3 text-2xl font-bold text-white cursor-pointer" onClick={() => {setCurrentProposal(null); setError(null);}}>
-            <div className="p-2 bg-blue-500/10 rounded-xl">
+        <header className="flex flex-col sm:flex-row justify-between items-center sm:pb-8 border-b border-white/5 mb-12 gap-4">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3 text-2xl font-bold text-white cursor-pointer group" 
+            onClick={() => {setCurrentProposal(null); setError(null);}}
+          >
+            <div className="p-2 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-all duration-300">
               <CalendarDays size={32} className="text-blue-500" />
             </div>
-            <span className="tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 hover:text-white transition-colors">
+            <span className="tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 group-hover:from-white group-hover:to-white transition-all duration-300">
               AI Event Concierge
             </span>
-          </div>
-          <div className="text-slate-400 font-medium text-sm sm:text-base">
-            Plan your corporate offsite in seconds
-          </div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-6"
+          >
+            <div className="hidden md:flex items-center gap-2 text-slate-400 font-medium text-sm">
+              <Sparkles size={16} className="text-yellow-500/50" />
+              Powered by Gemini 1.5 Flash
+            </div>
+            <div className="h-6 w-px bg-white/10 hidden md:block"></div>
+            <div className="text-slate-400 font-medium text-sm sm:text-base">
+              Plan your corporate offsite in seconds
+            </div>
+          </motion.div>
         </header>
         
         <main>
-          <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+          </motion.div>
           
-          {error && (
-            <div className="max-w-3xl mx-auto mb-8 bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400">
-              <AlertCircle size={20} />
-              <p>{error}</p>
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="max-w-3xl mx-auto mb-8 bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400"
+              >
+                <AlertCircle size={20} />
+                <p>{error}</p>
+              </motion.div>
+            )}
 
-          {isLoading && <LoadingSpinner />}
-          {!isLoading && currentProposal && <ProposalCard proposal={currentProposal} />}
-          {!isLoading && !currentProposal && <HistoryList history={history} onSelectHistory={setCurrentProposal} />}
+            {isLoading && (
+              <motion.div 
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <LoadingSpinner />
+              </motion.div>
+            )}
+
+            {!isLoading && currentProposal && (
+              <motion.div 
+                key="proposal"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ type: 'spring', damping: 20 }}
+              >
+                <div className="flex justify-start mb-4 max-w-4xl mx-auto">
+                  <button 
+                    onClick={() => setCurrentProposal(null)}
+                    className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                  >
+                    ← Back to history
+                  </button>
+                </div>
+                <ProposalCard proposal={currentProposal} />
+              </motion.div>
+            )}
+
+            {!isLoading && !currentProposal && (
+              <motion.div 
+                key="history"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <HistoryList history={history} onSelectHistory={setCurrentProposal} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </div>
