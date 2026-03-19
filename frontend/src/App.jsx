@@ -5,6 +5,7 @@ import SearchForm from './components/SearchForm';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProposalCard from './components/ProposalCard';
 import HistoryList from './components/HistoryList';
+import Footer from './components/Footer';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
@@ -169,6 +170,7 @@ function App() {
           </section>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
