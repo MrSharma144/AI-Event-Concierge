@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarDays, AlertCircle, History, LayoutDashboard } from 'lucide-react';
+import { CalendarDays, AlertCircle, History, LayoutDashboard, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchForm from './components/SearchForm';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -82,83 +82,91 @@ function App() {
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-6"
+            className="flex items-center gap-4 sm:gap-8"
           >
+            <button 
+              onClick={() => document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-slate-400 hover:text-white transition-all font-medium text-sm sm:text-base group"
+            >
+              <History size={18} className="group-hover:rotate-[-20deg] transition-transform" />
+              <span>History</span>
+            </button>
+            <div className="h-6 w-px bg-white/10"></div>
             <div className="hidden md:flex items-center gap-2 text-slate-400 font-medium text-sm">
               <Sparkles size={16} className="text-yellow-500/50" />
               Powered by Gemini 1.5 Flash
             </div>
-            <div className="h-6 w-px bg-white/10 hidden md:block"></div>
-            <div className="text-slate-400 font-medium text-sm sm:text-base">
-              Plan your corporate offsite in seconds
-            </div>
           </motion.div>
         </header>
         
-        <main>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-          </motion.div>
-          
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="max-w-3xl mx-auto mb-8 bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400"
-              >
-                <AlertCircle size={20} />
-                <p>{error}</p>
-              </motion.div>
-            )}
+        <main className="space-y-24">
+          <section id="search-section">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+            </motion.div>
+            
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="max-w-3xl mx-auto mt-8 bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400"
+                >
+                  <AlertCircle size={20} />
+                  <p>{error}</p>
+                </motion.div>
+              )}
 
-            {isLoading && (
-              <motion.div 
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <LoadingSpinner />
-              </motion.div>
-            )}
+              {isLoading && (
+                <motion.div 
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-12"
+                >
+                  <LoadingSpinner />
+                </motion.div>
+              )}
 
-            {!isLoading && currentProposal && (
-              <motion.div 
-                key="proposal"
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ type: 'spring', damping: 20 }}
-              >
-                <div className="flex justify-start mb-4 max-w-4xl mx-auto">
-                  <button 
-                    onClick={() => setCurrentProposal(null)}
-                    className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
-                  >
-                    ← Back to history
-                  </button>
-                </div>
-                <ProposalCard proposal={currentProposal} />
-              </motion.div>
-            )}
+              {!isLoading && currentProposal && (
+                <motion.div 
+                  key="proposal"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 40 }}
+                  transition={{ type: 'spring', damping: 20 }}
+                  className="mt-12"
+                >
+                  <div className="flex justify-between items-center mb-4 max-w-4xl mx-auto">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                      <LayoutDashboard size={20} className="text-blue-500" />
+                      Current Result
+                    </h2>
+                    <button 
+                      onClick={() => setCurrentProposal(null)}
+                      className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                    >
+                      Clear result
+                    </button>
+                  </div>
+                  <ProposalCard proposal={currentProposal} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
 
-            {!isLoading && !currentProposal && (
-              <motion.div 
-                key="history"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <HistoryList history={history} onSelectHistory={setCurrentProposal} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <section id="history-section" className="pt-24 border-t border-white/5 pb-20">
+            <HistoryList history={history} onSelectHistory={(prop) => {
+              setCurrentProposal(prop);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} />
+          </section>
         </main>
       </div>
     </div>

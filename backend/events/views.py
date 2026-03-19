@@ -33,6 +33,7 @@ def propose_event(request):
         'estimated_cost': venue_proposal.estimated_cost,
         'justification': venue_proposal.justification,
         'query': event_search.query,
+        'created_at': event_search.created_at.isoformat(),
     })
 
 @api_view(['GET'])
