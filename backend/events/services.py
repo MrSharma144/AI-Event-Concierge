@@ -3,16 +3,7 @@ import google.generativeai as genai
 from django.conf import settings
 
 def generate_venue_proposal(query: str) -> dict:
-    """
-    Calls the Gemini API to get a structured JSON venue proposal based on the given query.
-    Expected returned structure:
-    {
-        "venue_name": "Name of the venue",
-        "location": "Location",
-        "estimated_cost": "$Cost",
-        "justification": "Why it fits the event"
-    }
-    """
+ 
     api_key = settings.GEMINI_API_KEY
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not set in the environment.")
@@ -23,24 +14,32 @@ def generate_venue_proposal(query: str) -> dict:
     model = genai.GenerativeModel('gemini-flash-latest')
     
     prompt = f'''
-    You are an expert AI Event Concierge. Your task is to plan a corporate event based on the user's natural language description.
+    SYSTEM ROLE: 
+    You are a Strategic AI Event Architect for a luxury corporate concierge service. Your objective is to transform natural language event requests into high-fidelity, structured venue proposals.
+
+    INSTRUCTIONS:
+    1. Parse the USER_QUERY for: headcount, event type, budget, location preferences, and tone.
+    2. If details are missing (e.g., budget), provide a "Market-Standard" estimate based on the event scale.
+    3. The "justification" field must be professional, persuasive, and directly reference how the venue satisfies the specific constraints in the query.
+    4. Return ONLY a valid JSON object. No conversational preamble, no markdown formatting (```json), and no closing text.
+
+    JSON SCHEMA:
+    {{
+        "venue_name": "string (The specific, professional name of the suggested venue)",
+        "location": "string (City, Region, or Address)",
+        "estimated_cost": "string (Formatted currency, e.g., '$5,000' or '$12,500 including catering')",
+        "justification": "string (A detailed, high-impact paragraph highlighting 3+ reasons for the selection)"
+    }}
+
+    USER_QUERY: "{query}"
     
-    User Query: "{query}"
-    
-    You must respond ONLY with a valid, raw JSON object representing a venue proposal that fits the request. Do not include markdown formatting like ```json or ``` at the beginning or end.
-    
-    The JSON object must have exactly the following keys:
-    - "venue_name": A creative and suitable venue name.
-    - "location": The venue's location (city, state, or specific region as appropriate).
-    - "estimated_cost": A realistic estimate of the total cost formatted as a string (e.g., "$4,000" or "$15,000 - $20,000").
-    - "justification": A compelling paragraph explaining why this venue perfectly fits the user's event.
+    RESPONSE (JSON ONLY):
     '''
 
     response = model.generate_content(prompt)
     
     try:
         response_text = response.text.strip()
-        # Clean up possible markdown wrappers if the AI didn't follow instructions
         if response_text.startswith("```json"):
             response_text = response_text[7:]
         if response_text.startswith("```"):
