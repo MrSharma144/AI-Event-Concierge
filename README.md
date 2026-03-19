@@ -89,5 +89,31 @@ For evaluators focusing on **AI Prompting** and **Consistent Structured Data**:
 
 ---
 
+## ☁️ Deployment (Render + PostgreSQL)
+
+### 1. Database (Render PostgreSQL)
+- Create a new **PostgreSQL** database on Render.
+- Copy the **Internal Database URL** for the backend service.
+
+### 2. Backend (Render Web Service)
+- **Runtime**: Python 3
+- **Build Command**: `./build.sh` (ensure it's executable: `chmod +x build.sh`)
+- **Start Command**: `gunicorn backend.wsgi:application`
+- **Environment Variables**:
+  - `DATABASE_URL`: Your Render Postgres URL.
+  - `GEMINI_API_KEY`: Your Google AI Studio key.
+  - `SECRET_KEY`: A random secure string.
+  - `DEBUG`: `False`
+  - `ALLOWED_HOSTS`: `your-backend-url.onrender.com`
+  - `CSRF_TRUSTED_ORIGINS`: `https://your-frontend-url.onrender.com`
+
+### 3. Frontend (Render Static Site)
+- **Build Command**: `npm install && npm run build`
+- **Publish Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
+
+---
+
 ## 👤 Author
 - **MrSharma** - [GitHub Profile](https://github.com/MrSharma144)
