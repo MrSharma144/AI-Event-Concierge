@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, ChevronRight, Sparkles, X, MapPin, DollarSign, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HistoryList({ history, onSelectHistory }) {
   const [selectedRecord, setSelectedRecord] = useState(null);
+
+  useEffect(() => {
+    if (selectedRecord) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedRecord]);
 
   if (!history || history.length === 0) return null;
 
