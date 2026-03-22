@@ -13,6 +13,8 @@ class VenueProposal(models.Model):
     location = models.CharField(max_length=255)
     estimated_cost = models.CharField(max_length=100)
     justification = models.TextField()
+    image_url = models.URLField(max_length=500, null=True, blank=True)
+
 
     def __str__(self):
         return self.venue_name

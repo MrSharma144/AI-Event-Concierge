@@ -31,7 +31,9 @@ def generate_venue_proposal(query: str) -> dict:
                 "venue_name": "string (The specific, professional name of the suggested venue)",
                 "location": "string (City, Region, or Address)",
                 "estimated_cost": "string (Formatted currency, e.g., '$5,000' or '$12,500 including catering')",
-                "justification": "string (A detailed, high-impact paragraph highlighting 3+ reasons for the selection)"
+                "justification": "string (A detailed, high-impact paragraph highlighting 3+ reasons for the selection)",
+                "image_url": "string (A high-quality Unsplash image URL that represents this venue, e.g., https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1000)"
+
             }}
         ]
     }}

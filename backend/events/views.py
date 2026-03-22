@@ -1,9 +1,16 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 from .models import EventSearch, VenueProposal
 from .services import generate_venue_proposal
+from .serializers import EventSearchSerializer, ProposeEventRequestSerializer, ProposeEventResponseSerializer
 
+@extend_schema(
+    request=ProposeEventRequestSerializer,
+    responses={200: ProposeEventResponseSerializer},
+    description="Generate venue proposals for a specific event query."
+)
 @api_view(['POST'])
 def propose_event(request):
     query = request.data.get('query')
@@ -26,7 +33,8 @@ def propose_event(request):
             venue_name=prop.get('venue_name', 'Unknown'),
             location=prop.get('location', 'Unknown'),
             estimated_cost=prop.get('estimated_cost', 'Unknown'),
-            justification=prop.get('justification', 'No justification provided.')
+            justification=prop.get('justification', 'No justification provided.'),
+            image_url=prop.get('image_url')
         )
         proposals_to_return.append({
             'id': venue_proposal.id,
@@ -34,6 +42,7 @@ def propose_event(request):
             'location': venue_proposal.location,
             'estimated_cost': venue_proposal.estimated_cost,
             'justification': venue_proposal.justification,
+            'image_url': venue_proposal.image_url,
         })
 
     return Response({
@@ -43,6 +52,10 @@ def propose_event(request):
         'proposals': proposals_to_return
     })
 
+@extend_schema(
+    responses={200: EventSearchSerializer(many=True)},
+    description="Retrieve the history of event searches and their proposals."
+)
 @api_view(['GET'])
 def get_history(request):
     searches = EventSearch.objects.all().order_by('-created_at')
@@ -59,6 +72,7 @@ def get_history(request):
                 'location': p.location,
                 'estimated_cost': p.estimated_cost,
                 'justification': p.justification,
+                'image_url': p.image_url,
             } for p in proposals]
         })
             
